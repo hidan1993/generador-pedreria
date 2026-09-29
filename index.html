@@ -1,0 +1,940 @@
+```html
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhinestone Studio Pro - Generador de Plantillas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        studio: {
+                            50: '#f0f4ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#1e1b4b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .canvas-bg-checker {
+            background-color: #1e293b;
+            background-image: linear-gradient(45deg, #0f172a 25%, transparent 25%), linear-gradient(-45deg, #0f172a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0f172a 75%), linear-gradient(-45deg, transparent 75%, #0f172a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden bg-slate-950 text-slate-100">
+
+    <!-- Top Header / App Bar -->
+    <header class="h-14 border-b border-slate-800 bg-slate-900/80 backdrop-blur px-4 flex items-center justify-between z-20 shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <i class="fa-solid font-bold text-white text-lg">💎</i>
+            </div>
+            <div>
+                <h1 class="font-bold text-slate-100 text-base leading-none">Rhinestone Studio <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">PRO</span></h1>
+                <p class="text-xs text-slate-400">Generador de Plantillas de Pedrería para Plotter de Corte</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button id="btnResetCanvas" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition flex items-center gap-2 border border-slate-700">
+                <i class="fa-solid fa-rotate-left"></i> Reiniciar
+            </button>
+            <button id="btnExportSVG" class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Exportar SVG (Cricut/Silhouette)
+            </button>
+            <button id="btnExportPNG" class="px-3 py-1.5 text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-lg transition border border-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-image"></i> Exportar PNG
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- Left Control Sidebar -->
+        <aside class="w-80 border-r border-slate-800 bg-slate-900/50 flex flex-col shrink-0 overflow-y-auto">
+            <div class="p-4 space-y-6">
+
+                <!-- Input Type Toggle (Text vs Image) -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Fuente del Diseño</label>
+                    <div class="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                        <button id="tabText" class="py-2 text-xs font-medium rounded-lg transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+                            <i class="fa-solid fa-font"></i> Texto
+                        </button>
+                        <button id="tabImage" class="py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-image"></i> Imagen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Text Controls Section -->
+                <div id="sectionTextControls" class="space-y-4">
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Texto Personalizado</label>
+                        <input type="text" id="inputText" value="LOVE" placeholder="Ingresa texto..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Fuente</label>
+                        <select id="selectFont" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                            <option value="Impact">Impact (Recomendada)</option>
+                            <option value="Arial Black">Arial Black</option>
+                            <option value="Trebuchet MS">Trebuchet MS</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Courier New">Courier New</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-medium text-slate-300">Tamaño de Fuente</label>
+                            <span id="valFontSize" class="text-xs text-indigo-400 font-mono">110px</span>
+                        </div>
+                        <input type="range" id="rangeFontSize" min="40" max="220" value="110" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+
+                <!-- Image Controls Section (Hidden by default) -->
+                <div id="sectionImageControls" class="space-y-4 hidden">
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Cargar Imagen PNG (Sin fondo)</label>
+                        <div class="relative border-2 border-dashed border-slate-800 hover:border-indigo-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/50 group">
+                            <input type="file" id="fileImage" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-500 group-hover:text-indigo-400 mb-1 transition"></i>
+                            <p class="text-xs text-slate-400 group-hover:text-slate-200">Arrastra o haz clic para subir</p>
+                            <p class="text-[10px] text-slate-500 mt-1">Sugerido: PNG con fondo transparente</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-medium text-slate-300">Umbral de Detección (Alpha)</label>
+                            <span id="valThreshold" class="text-xs text-indigo-400 font-mono">128</span>
+                        </div>
+                        <input type="range" id="rangeThreshold" min="10" max="245" value="128" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+
+                <hr class="border-slate-800">
+
+                <!-- Rhinestone Specifications -->
+                <div class="space-y-4">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Configuración de Pedrería</label>
+
+                    <!-- Stone Size Dropdown/Radio -->
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Tamaño de Piedra (Talla SS)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button data-ss="SS6" data-mm="2.0" class="btn-ss-size px-3 py-2 border rounded-lg text-xs font-semibold text-center transition border-slate-800 bg-slate-950 text-slate-400 hover:border-indigo-500/50">
+                                SS6 <span class="text-[10px] block font-normal opacity-70">2.0 mm</span>
+                            </button>
+                            <button data-ss="SS10" data-mm="3.0" class="btn-ss-size px-3 py-2 border rounded-lg text-xs font-semibold text-center transition border-indigo-500 bg-indigo-600/10 text-indigo-400">
+                                SS10 <span class="text-[10px] block font-normal opacity-70">3.0 mm</span>
+                            </button>
+                            <button data-ss="SS16" data-mm="4.0" class="btn-ss-size px-3 py-2 border rounded-lg text-xs font-semibold text-center transition border-slate-800 bg-slate-950 text-slate-400 hover:border-indigo-500/50">
+                                SS16 <span class="text-[10px] block font-normal opacity-70">4.0 mm</span>
+                            </button>
+                            <button data-ss="SS20" data-mm="5.0" class="btn-ss-size px-3 py-2 border rounded-lg text-xs font-semibold text-center transition border-slate-800 bg-slate-950 text-slate-400 hover:border-indigo-500/50">
+                                SS20 <span class="text-[10px] block font-normal opacity-70">5.0 mm</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pattern Fill Type -->
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Tipo de Patrón / Relleno</label>
+                        <select id="selectPattern" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                            <option value="grid">Línea Recta / Cuadrícula</option>
+                            <option value="honeycomb" selected>Hexagonal / Panal (Recomendado)</option>
+                            <option value="outline">Sólo Contorno</option>
+                        </select>
+                    </div>
+
+                    <!-- Spacing Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-medium text-slate-300">Espaciado entre piedras</label>
+                            <span id="valSpacing" class="text-xs text-indigo-400 font-mono">0.6 mm</span>
+                        </div>
+                        <input type="range" id="rangeSpacing" min="0.2" max="2.5" step="0.1" value="0.6" class="w-full accent-indigo-500">
+                    </div>
+
+                    <!-- Scale Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-medium text-slate-300">Escala General del Diseño</label>
+                            <span id="valScale" class="text-xs text-indigo-400 font-mono">1.0x</span>
+                        </div>
+                        <input type="range" id="rangeScale" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+
+                <hr class="border-slate-800">
+
+                <!-- Aesthetics & Visuals -->
+                <div class="space-y-4">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Apariencia y Colores</label>
+
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Color de Pedrería</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="color" id="colorStone" value="#38bdf8" class="w-10 h-10 rounded-lg border border-slate-800 bg-slate-950 cursor-pointer p-0.5">
+                            <span id="hexStone" class="text-xs font-mono text-slate-400">#38BDF8</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Fondo Simulador (Prenda)</label>
+                        <div class="flex items-center gap-2">
+                            <button data-bg="#0f172a" class="btn-bg-preview w-8 h-8 rounded-full bg-slate-900 border-2 border-indigo-500 transition shadow"></button>
+                            <button data-bg="#000000" class="btn-bg-preview w-8 h-8 rounded-full bg-black border border-slate-700 hover:border-slate-400 transition shadow"></button>
+                            <button data-bg="#ffffff" class="btn-bg-preview w-8 h-8 rounded-full bg-white border border-slate-700 hover:border-slate-400 transition shadow"></button>
+                            <button data-bg="#1e3a8a" class="btn-bg-preview w-8 h-8 rounded-full bg-blue-900 border border-slate-700 hover:border-slate-400 transition shadow"></button>
+                            <button data-bg="#881337" class="btn-bg-preview w-8 h-8 rounded-full bg-rose-900 border border-slate-700 hover:border-slate-400 transition shadow"></button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2 pt-1">
+                        <input type="checkbox" id="chkShowSparkle" checked class="w-4 h-4 rounded accent-indigo-600 bg-slate-950 border-slate-800">
+                        <label for="chkShowSparkle" class="text-xs text-slate-300 select-none">Efecto de Brillo / Destellos</label>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Center Canvas Viewport -->
+        <main class="flex-1 flex flex-col relative bg-slate-950 overflow-hidden">
+
+            <!-- Canvas Top Toolbar (Zoom, Info) -->
+            <div class="absolute top-4 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+                <div class="bg-slate-900/90 backdrop-blur border border-slate-800 px-3 py-1.5 rounded-xl shadow-lg pointer-events-auto flex items-center space-x-3 text-xs text-slate-300">
+                    <span id="canvasDimInfo" class="font-mono text-indigo-400"><i class="fa-solid fa-ruler-combined mr-1"></i> 0.0 x 0.0 cm</span>
+                    <span class="text-slate-700">|</span>
+                    <span>Talla Seleccionada: <strong id="lblActiveSS" class="text-white">SS10 (3.0mm)</strong></span>
+                </div>
+
+                <div class="bg-slate-900/90 backdrop-blur border border-slate-800 p-1 rounded-xl shadow-lg pointer-events-auto flex items-center space-x-1">
+                    <button id="btnZoomOut" class="w-8 h-8 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition">
+                        <i class="fa-solid fa-minus text-xs"></i>
+                    </button>
+                    <span id="lblZoom" class="text-xs font-mono px-2 text-slate-300">100%</span>
+                    <button id="btnZoomIn" class="w-8 h-8 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                    <button id="btnZoomReset" class="w-8 h-8 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition" title="Ajustar Vista">
+                        <i class="fa-solid fa-expand text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div id="canvasViewport" class="flex-1 canvas-bg-checker flex items-center justify-center overflow-auto p-8 relative cursor-grab active:cursor-grabbing">
+                <div id="canvasContainer" class="relative shadow-2xl transition-all duration-150 rounded-lg overflow-hidden border border-slate-800/50">
+                    <canvas id="mainCanvas" class="block"></canvas>
+                </div>
+            </div>
+
+            <!-- Canvas Bottom Status Bar -->
+            <div class="h-8 border-t border-slate-800 bg-slate-900/80 px-4 flex items-center justify-between text-xs text-slate-400 shrink-0">
+                <div class="flex items-center space-x-4">
+                    <span><i class="fa-solid fa-gem text-indigo-400 mr-1"></i> Total Pedrería: <strong id="statusStoneCount" class="text-white font-mono">0</strong> piedras</span>
+                </div>
+                <div id="statusProcessing" class="hidden flex items-center text-indigo-400 space-x-2">
+                    <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                    <span>Procesando patrón...</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Cost Estimator & Template Analytics -->
+        <aside class="w-72 border-l border-slate-800 bg-slate-900/50 flex flex-col shrink-0">
+            <div class="p-4 space-y-6 flex-1 overflow-y-auto">
+
+                <!-- Cost Calculator Header -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-indigo-400"></i> Calculadora de Costos
+                    </h2>
+                </div>
+
+                <!-- Live Summary Cards -->
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3">
+                        <span class="text-[11px] text-slate-400 block mb-0.5">Total de Pedrería</span>
+                        <div class="flex items-baseline justify-between">
+                            <span id="calcTotalStones" class="text-2xl font-black text-indigo-400 font-mono">0</span>
+                            <span class="text-xs text-slate-400">piezas</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+                        <span class="text-[11px] text-slate-400 block mb-0.5">Costo Estimado de Piedras</span>
+                        <div class="flex items-baseline justify-between">
+                            <span id="calcTotalCost" class="text-2xl font-black text-emerald-400 font-mono">$0.00</span>
+                            <span class="text-xs text-slate-400">USD/MXN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bag Settings Inputs -->
+                <div class="space-y-4 pt-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Parámetros de Paquete</label>
+
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Piezas por Bolsa/Paquete</label>
+                        <input type="number" id="inputBagQuantity" value="1440" min="1" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 font-mono focus:outline-none focus:border-indigo-500 transition">
+                        <p class="text-[10px] text-slate-500 mt-1">Gros de pedrería estándar: 1,440 pzs (10 Gross)</p>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Precio por Bolsa / Paquete ($)</label>
+                        <input type="number" id="inputBagPrice" value="5.50" step="0.50" min="0" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 font-mono focus:outline-none focus:border-indigo-500 transition">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Costo Unitario por Piedra</label>
+                        <div id="calcUnitPrice" class="px-3 py-2 bg-slate-950/50 border border-slate-800/80 rounded-lg text-xs font-mono text-slate-400">
+                            $0.0038 / pieza
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-800">
+
+                <!-- Material Requirements Breakdown -->
+                <div class="space-y-3">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Desglose de Material</label>
+
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Bolsas requeridas:</span>
+                        <span id="calcBagsNeeded" class="font-mono font-semibold text-slate-200">0 bolsas</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Área Estimada del Diseño:</span>
+                        <span id="calcArea" class="font-mono font-semibold text-slate-200">0 cm²</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Densidad Aproximada:</span>
+                        <span id="calcDensity" class="font-mono font-semibold text-slate-200">0 pts/cm²</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Export Tip Footer -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/40 text-[11px] text-slate-400 leading-relaxed">
+                <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i> El archivo SVG exportado contendrá vectores de círculos con el diámetro exacto para la plantilla de vinil/velvet de plotter.
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Application Logic Javascript -->
+    <script>
+        // State Management
+        const state = {
+            mode: 'text', // 'text' or 'image'
+            text: 'LOVE',
+            font: 'Impact',
+            fontSize: 110,
+            image: null,
+            threshold: 128,
+            ssSize: 'SS10',
+            stoneDiameterMm: 3.0,
+            pattern: 'honeycomb', // 'grid', 'honeycomb', 'outline'
+            spacingMm: 0.6,
+            scale: 1.0,
+            stoneColor: '#38bdf8',
+            bgColor: '#0f172a',
+            showSparkle: true,
+            bagQuantity: 1440,
+            bagPrice: 5.50,
+            zoom: 1.0,
+            stones: [], // Calculated stones [{x, y, radius}]
+            canvasWidth: 800,
+            canvasHeight: 500,
+            pixelRatio: window.devicePixelRatio || 1
+        };
+
+        // DOM Element References
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const canvasViewport = document.getElementById('canvasViewport');
+
+        // Inputs & Controls
+        const tabText = document.getElementById('tabText');
+        const tabImage = document.getElementById('tabImage');
+        const sectionTextControls = document.getElementById('sectionTextControls');
+        const sectionImageControls = document.getElementById('sectionImageControls');
+
+        const inputText = document.getElementById('inputText');
+        const selectFont = document.getElementById('selectFont');
+        const rangeFontSize = document.getElementById('rangeFontSize');
+        const valFontSize = document.getElementById('valFontSize');
+
+        const fileImage = document.getElementById('fileImage');
+        const rangeThreshold = document.getElementById('rangeThreshold');
+        const valThreshold = document.getElementById('valThreshold');
+
+        const selectPattern = document.getElementById('selectPattern');
+        const rangeSpacing = document.getElementById('rangeSpacing');
+        const valSpacing = document.getElementById('valSpacing');
+        const rangeScale = document.getElementById('rangeScale');
+        const valScale = document.getElementById('valScale');
+
+        const colorStone = document.getElementById('colorStone');
+        const hexStone = document.getElementById('hexStone');
+        const chkShowSparkle = document.getElementById('chkShowSparkle');
+
+        const inputBagQuantity = document.getElementById('inputBagQuantity');
+        const inputBagPrice = document.getElementById('inputBagPrice');
+
+        // Display Labels
+        const canvasDimInfo = document.getElementById('canvasDimInfo');
+        const lblActiveSS = document.getElementById('lblActiveSS');
+        const statusStoneCount = document.getElementById('statusStoneCount');
+        const calcTotalStones = document.getElementById('calcTotalStones');
+        const calcTotalCost = document.getElementById('calcTotalCost');
+        const calcUnitPrice = document.getElementById('calcUnitPrice');
+        const calcBagsNeeded = document.getElementById('calcBagsNeeded');
+        const calcArea = document.getElementById('calcArea');
+        const calcDensity = document.getElementById('calcDensity');
+        const statusProcessing = document.getElementById('statusProcessing');
+
+        // Zoom Controls
+        const btnZoomIn = document.getElementById('btnZoomIn');
+        const btnZoomOut = document.getElementById('btnZoomOut');
+        const btnZoomReset = document.getElementById('btnZoomReset');
+        const lblZoom = document.getElementById('lblZoom');
+
+        // Export Buttons
+        const btnExportSVG = document.getElementById('btnExportSVG');
+        const btnExportPNG = document.getElementById('btnExportPNG');
+        const btnResetCanvas = document.getElementById('btnResetCanvas');
+
+        // Setup Event Listeners
+        function initEventListeners() {
+            // Tab Toggling
+            tabText.addEventListener('click', () => {
+                state.mode = 'text';
+                tabText.className = 'py-2 text-xs font-medium rounded-lg transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm';
+                tabImage.className = 'py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2';
+                sectionTextControls.classList.remove('hidden');
+                sectionImageControls.classList.add('hidden');
+                triggerCalculation();
+            });
+
+            tabImage.addEventListener('click', () => {
+                state.mode = 'image';
+                tabImage.className = 'py-2 text-xs font-medium rounded-lg transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm';
+                tabText.className = 'py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2';
+                sectionImageControls.classList.remove('hidden');
+                sectionTextControls.classList.add('hidden');
+                triggerCalculation();
+            });
+
+            // Text Inputs
+            inputText.addEventListener('input', (e) => {
+                state.text = e.target.value;
+                triggerCalculation();
+            });
+
+            selectFont.addEventListener('change', (e) => {
+                state.font = e.target.value;
+                triggerCalculation();
+            });
+
+            rangeFontSize.addEventListener('input', (e) => {
+                state.fontSize = parseInt(e.target.value);
+                valFontSize.textContent = `${state.fontSize}px`;
+                triggerCalculation();
+            });
+
+            // Image Upload
+            fileImage.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            state.image = img;
+                            triggerCalculation();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            rangeThreshold.addEventListener('input', (e) => {
+                state.threshold = parseInt(e.target.value);
+                valThreshold.textContent = state.threshold;
+                triggerCalculation();
+            });
+
+            // Stone Sizes
+            document.querySelectorAll('.btn-ss-size').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.btn-ss-size').forEach(b => {
+                        b.className = 'btn-ss-size px-3 py-2 border rounded-lg text-xs font-semibold text-center transition border-slate-800 bg-slate-950 text-slate-400 hover:border-indigo-500/50';
+                    });
+                    const target = e.currentTarget;
+                    target.className = 'btn-ss-size px-3 py-2 border rounded-lg text-xs font-semibold text-center transition border-indigo-500 bg-indigo-600/10 text-indigo-400';
+                    state.ssSize = target.dataset.ss;
+                    state.stoneDiameterMm = parseFloat(target.dataset.mm);
+                    lblActiveSS.textContent = `${state.ssSize} (${state.stoneDiameterMm.toFixed(1)}mm)`;
+                    triggerCalculation();
+                });
+            });
+
+            // Pattern & Spacing
+            selectPattern.addEventListener('change', (e) => {
+                state.pattern = e.target.value;
+                triggerCalculation();
+            });
+
+            rangeSpacing.addEventListener('input', (e) => {
+                state.spacingMm = parseFloat(e.target.value);
+                valSpacing.textContent = `${state.spacingMm.toFixed(1)} mm`;
+                triggerCalculation();
+            });
+
+            rangeScale.addEventListener('input', (e) => {
+                state.scale = parseFloat(e.target.value);
+                valScale.textContent = `${state.scale.toFixed(2)}x`;
+                triggerCalculation();
+            });
+
+            // Colors
+            colorStone.addEventListener('input', (e) => {
+                state.stoneColor = e.target.value;
+                hexStone.textContent = e.target.value.toUpperCase();
+                renderCanvas();
+            });
+
+            document.querySelectorAll('.btn-bg-preview').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.btn-bg-preview').forEach(b => b.classList.remove('border-2', 'border-indigo-500'));
+                    e.currentTarget.classList.add('border-2', 'border-indigo-500');
+                    state.bgColor = e.currentTarget.dataset.bg;
+                    renderCanvas();
+                });
+            });
+
+            chkShowSparkle.addEventListener('change', (e) => {
+                state.showSparkle = e.target.checked;
+                renderCanvas();
+            });
+
+            // Calculator Inputs
+            inputBagQuantity.addEventListener('input', (e) => {
+                state.bagQuantity = Math.max(1, parseInt(e.target.value) || 1);
+                updateCostCalculations();
+            });
+
+            inputBagPrice.addEventListener('input', (e) => {
+                state.bagPrice = Math.max(0, parseFloat(e.target.value) || 0);
+                updateCostCalculations();
+            });
+
+            // Zoom Handlers
+            btnZoomIn.addEventListener('click', () => {
+                state.zoom = Math.min(2.5, state.zoom + 0.15);
+                applyZoom();
+            });
+
+            btnZoomOut.addEventListener('click', () => {
+                state.zoom = Math.max(0.4, state.zoom - 0.15);
+                applyZoom();
+            });
+
+            btnZoomReset.addEventListener('click', () => {
+                state.zoom = 1.0;
+                applyZoom();
+            });
+
+            // Export Listeners
+            btnExportSVG.addEventListener('click', exportToSVG);
+            btnExportPNG.addEventListener('click', exportToPNG);
+            btnResetCanvas.addEventListener('click', resetAll);
+        }
+
+        function applyZoom() {
+            canvasContainer.style.transform = `scale(${state.zoom})`;
+            lblZoom.textContent = `${Math.round(state.zoom * 100)}%`;
+        }
+
+        function resetAll() {
+            state.text = 'LOVE';
+            inputText.value = 'LOVE';
+            state.fontSize = 110;
+            rangeFontSize.value = 110;
+            valFontSize.textContent = '110px';
+            state.scale = 1.0;
+            rangeScale.value = 1.0;
+            valScale.textContent = '1.0x';
+            state.spacingMm = 0.6;
+            rangeSpacing.value = 0.6;
+            valSpacing.textContent = '0.6 mm';
+            state.zoom = 1.0;
+            applyZoom();
+            triggerCalculation();
+        }
+
+        // Debounce calculation trigger to ensure high FPS during slider interaction
+        let calcTimeout = null;
+        function triggerCalculation() {
+            statusProcessing.classList.remove('hidden');
+            if (calcTimeout) clearTimeout(calcTimeout);
+            calcTimeout = setTimeout(() => {
+                calculateRhinestonePattern();
+                renderCanvas();
+                updateCostCalculations();
+                statusProcessing.classList.add('hidden');
+            }, 30);
+        }
+
+        /**
+         * Core Engine: Generates Rhinestone coordinates from text or image
+         */
+        function calculateRhinestonePattern() {
+            // Offscreen Buffer Canvas for Pixel Analysis
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d');
+
+            const width = 800;
+            const height = 500;
+            offCanvas.width = width;
+            offCanvas.height = height;
+
+            state.canvasWidth = width;
+            state.canvasHeight = height;
+
+            // Render source item onto offscreen buffer
+            offCtx.fillStyle = '#000000';
+            offCtx.fillRect(0, 0, width, height);
+
+            if (state.mode === 'text' && state.text.trim().length > 0) {
+                offCtx.fillStyle = '#ffffff';
+                offCtx.font = `bold ${state.fontSize * state.scale}px "${state.font}", sans-serif`;
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
+                offCtx.fillText(state.text, width / 2, height / 2);
+            } else if (state.mode === 'image' && state.image) {
+                const img = state.image;
+                const maxW = width * 0.8 * state.scale;
+                const maxH = height * 0.8 * state.scale;
+                const scale = Math.min(maxW / img.width, maxH / img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                const x = (width - w) / 2;
+                const y = (height - h) / 2;
+
+                offCtx.drawImage(img, x, y, w, h);
+            }
+
+            // Extract pixel array
+            const imgData = offCtx.getImageData(0, 0, width, height);
+            const pixels = imgData.data;
+
+            // Calculate Grid Dimensions in Screen Pixels
+            // Screen scale factor: Assume 96 DPI -> 1 inch = 25.4mm -> 1mm ≈ 3.78px
+            const pxPerMm = 3.78;
+            const stonePxRadius = (state.stoneDiameterMm * pxPerMm) / 2;
+            const spacingPx = state.spacingMm * pxPerMm;
+            const stepX = (state.stoneDiameterMm * pxPerMm) + spacingPx;
+            const stepY = state.pattern === 'honeycomb' ? stepX * Math.sin(Math.PI / 3) : stepX;
+
+            const stones = [];
+
+            // Helper to check if pixel is active
+            const isPixelActive = (px, py) => {
+                const ix = Math.floor(px);
+                const iy = Math.floor(py);
+                if (ix < 0 || ix >= width || iy < 0 || iy >= height) return false;
+                const idx = (iy * width + ix) * 4;
+                // Brightness or Alpha check
+                const r = pixels[idx];
+                const g = pixels[idx + 1];
+                const b = pixels[idx + 2];
+                const alpha = pixels[idx + 3];
+                
+                if (state.mode === 'image') {
+                    // Combine alpha & brightness
+                    const brightness = (r + g + b) / 3;
+                    return alpha > 50 && brightness > (255 - state.threshold);
+                }
+                return r > 100; // Text is solid white
+            };
+
+            // Grid Sampling Loop
+            let rowIndex = 0;
+            for (let y = stonePxRadius + 10; y < height - stonePxRadius - 10; y += stepY) {
+                const xOffset = (state.pattern === 'honeycomb' && rowIndex % 2 === 1) ? stepX / 2 : 0;
+                rowIndex++;
+
+                for (let x = stonePxRadius + 10 + xOffset; x < width - stonePxRadius - 10; x += stepX) {
+                    
+                    if (state.pattern === 'outline') {
+                        // Contour Mode: Sample edge boundary pixels
+                        const center = isPixelActive(x, y);
+                        if (center) {
+                            const left = isPixelActive(x - stepX * 0.75, y);
+                            const right = isPixelActive(x + stepX * 0.75, y);
+                            const top = isPixelActive(x, y - stepY * 0.75);
+                            const bottom = isPixelActive(x, y + stepY * 0.75);
+
+                            // Add stone if it's near border edge
+                            if (!left || !right || !top || !bottom) {
+                                stones.push({ x, y, r: stonePxRadius });
+                            }
+                        }
+                    } else {
+                        // Full Fill Mode (Grid / Honeycomb)
+                        if (isPixelActive(x, y)) {
+                            stones.push({ x, y, r: stonePxRadius });
+                        }
+                    }
+                }
+            }
+
+            state.stones = stones;
+        }
+
+        /**
+         * Renders the generated stones onto the visible canvas with styling
+         */
+        function renderCanvas() {
+            mainCanvas.width = state.canvasWidth;
+            mainCanvas.height = state.canvasHeight;
+
+            // Draw Shirt/Fabric Background
+            ctx.fillStyle = state.bgColor;
+            ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+            // Draw Subtle Grid Pattern on Background for realism
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 1;
+            const gridSpacing = 20;
+            for (let x = 0; x < mainCanvas.width; x += gridSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, mainCanvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < mainCanvas.height; y += gridSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(mainCanvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw Stones
+            state.stones.forEach(stone => {
+                drawRhinestone(ctx, stone.x, stone.y, stone.r, state.stoneColor, state.showSparkle);
+            });
+        }
+
+        /**
+         * Draw individual Rhinestone with realistic faceted lighting & sparkles
+         */
+        function drawRhinestone(ctx, x, y, radius, colorHex, sparkle) {
+            ctx.save();
+
+            // Outer drop shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 3;
+            ctx.shadowOffsetY = 1.5;
+
+            // Base Circle Fill
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = colorHex;
+            ctx.fill();
+
+            // Reset Shadow for Inner Facets
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+            // Radial Facet Highlight
+            const grad = ctx.createRadialGradient(
+                x - radius * 0.3, y - radius * 0.3, radius * 0.1,
+                x, y, radius
+            );
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            grad.addColorStop(0.5, colorHex);
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Bevel Outline
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+
+            // Sparkle / Glint effect on random stones
+            if (sparkle && Math.random() < 0.15) {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(x - radius * 0.35, y - radius * 0.35, radius * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        /**
+         * Updates all cost and dimension statistics
+         */
+        function updateCostCalculations() {
+            const count = state.stones.length;
+            statusStoneCount.textContent = count.toLocaleString();
+            calcTotalStones.textContent = count.toLocaleString();
+
+            const unitPrice = state.bagPrice / state.bagQuantity;
+            const totalCost = count * unitPrice;
+            const bagsNeeded = Math.ceil(count / state.bagQuantity);
+
+            calcTotalCost.textContent = `$${totalCost.toFixed(2)}`;
+            calcUnitPrice.textContent = `$${unitPrice.toFixed(4)} / pieza`;
+            calcBagsNeeded.textContent = `${bagsNeeded} ${bagsNeeded === 1 ? 'bolsa' : 'bolsas'}`;
+
+            // Calculate Design Bounding Box Dimensions
+            if (count > 0) {
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                state.stones.forEach(s => {
+                    if (s.x < minX) minX = s.x;
+                    if (s.x > maxX) maxX = s.x;
+                    if (s.y < minY) minY = s.y;
+                    if (s.y > maxY) maxY = s.y;
+                });
+
+                const pxPerCm = 37.8; // 3.78 px/mm * 10
+                const widthCm = Math.max(0, (maxX - minX + state.stoneDiameterMm * 3.78) / pxPerCm);
+                const heightCm = Math.max(0, (maxY - minY + state.stoneDiameterMm * 3.78) / pxPerCm);
+                const areaCm2 = widthCm * heightCm;
+                const density = areaCm2 > 0 ? (count / areaCm2) : 0;
+
+                canvasDimInfo.innerHTML = `<i class="fa-solid fa-ruler-combined mr-1"></i> ${widthCm.toFixed(1)} x ${heightCm.toFixed(1)} cm`;
+                calcArea.textContent = `${areaCm2.toFixed(1)} cm²`;
+                calcDensity.textContent = `${density.toFixed(1)} pts/cm²`;
+            } else {
+                canvasDimInfo.innerHTML = `<i class="fa-solid fa-ruler-combined mr-1"></i> 0.0 x 0.0 cm`;
+                calcArea.textContent = '0 cm²';
+                calcDensity.textContent = '0 pts/cm²';
+            }
+        }
+
+        /**
+         * Export design to true-scale Vector SVG for Cutting Plotters (Cricut / Silhouette)
+         */
+        function exportToSVG() {
+            if (state.stones.length === 0) {
+                alert('No hay pedrería en el lienzo para exportar.');
+                return;
+            }
+
+            // Real physical scale: 1mm = 3.7795275591 px in SVG standard
+            const mmToPx = 3.779528;
+            const pxPerMm = 3.78; // Canvas scaling factor
+
+            // Bounding box calculation
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            state.stones.forEach(s => {
+                if (s.x < minX) minX = s.x;
+                if (s.x > maxX) maxX = s.x;
+                if (s.y < minY) minY = s.y;
+                if (s.y > maxY) maxY = s.y;
+            });
+
+            const marginMm = 5;
+            const radiusMm = state.stoneDiameterMm / 2;
+            const widthMm = ((maxX - minX) / pxPerMm) + (radiusMm * 2) + (marginMm * 2);
+            const heightMm = ((maxY - minY) / pxPerMm) + (radiusMm * 2) + (marginMm * 2);
+
+            let svgContent = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`;
+            svgContent += `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm.toFixed(2)}mm" height="${heightMm.toFixed(2)}mm" viewBox="0 0 ${widthMm.toFixed(2)} ${heightMm.toFixed(2)}">\n`;
+            svgContent += `  <!-- Created with Rhinestone Studio Pro -->\n`;
+            svgContent += `  <!-- Stone Size: ${state.ssSize} (${state.stoneDiameterMm}mm), Total Stones: ${state.stones.length} -->\n`;
+            svgContent += `  <g id="Rhinestone_Template" fill="#000000" stroke="none">\n`;
+
+            state.stones.forEach(s => {
+                const relXMm = ((s.x - minX) / pxPerMm) + radiusMm + marginMm;
+                const relYMm = ((s.y - minY) / pxPerMm) + radiusMm + marginMm;
+                svgContent += `    <circle cx="${relXMm.toFixed(3)}" cy="${relYMm.toFixed(3)}" r="${radiusMm.toFixed(3)}" />\n`;
+            });
+
+            svgContent += `  </g>\n</svg>`;
+
+            // Trigger Download
+            const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `plantilla_pedreria_${state.ssSize}_${Date.now()}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        /**
+         * Export HD Canvas PNG Preview
+         */
+        function exportToPNG() {
+            if (state.stones.length === 0) {
+                alert('El lienzo está vacío.');
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = `preview_pedreria_${Date.now()}.png`;
+            link.href = mainCanvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            initEventListeners();
+            triggerCalculation();
+        };
+    </script>
+</body>
+</html>
+```
